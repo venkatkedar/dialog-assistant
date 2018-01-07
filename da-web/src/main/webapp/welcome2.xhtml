@@ -1,0 +1,174 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<head>
+    
+<link type="text/css" rel="stylesheet" href="http://demo.codesamplez.com/bower_components/bootstrap/dist/css/bootstrap.min.css" />
+<link type="text/css" rel="stylesheet" href="http://demo.codesamplez.com/bower_components/jquery-ui/themes/smoothness/jquery-ui.css" />
+<link type="text/css" rel="stylesheet" href="http://demo.codesamplez.com/styles/main/layout.css" />
+<link type="text/css" rel="stylesheet" href="http://demo.codesamplez.com/styles/main/styles.css" />
+<link type="text/css" rel="stylesheet" href="http://demo.codesamplez.com/bower_components/google-code-prettify/bin/prettify.min.css" />
+<style>
+.column{
+	
+}
+
+.row{
+	display:none;
+	position : absolute;
+	left : 300px;
+	top: 600px;
+	align : center;
+}
+
+div.chat-window{
+	position:absolute;
+	left: 400px;
+	top: 100px;
+	width: 600px;
+	height: 400px;
+	background: lightblue;
+}
+
+.chat-window div.chat-body{
+	position:relative;
+	top:0px;
+	width:100%;
+	height:370px;
+	cell-spacing:10px;
+	background: lightyellow;
+	overflow : auto;
+	scrollTop: height;
+}
+
+ul.mesg-history{
+	list-style-type:none;
+}
+
+ul.mesg-history li.usermessage{
+	text-align:right;
+	color:green;
+}
+
+ul.mesg-history li.systemmessage{
+	text-align:left;
+	color:red;
+}
+</style>
+  </head>
+  
+  
+  
+
+<h:body>
+
+<div class="chat-window">
+<div></div>
+
+<p:panel id="chat_body" class="chat-body">
+<ul class="mesg-history">
+<ui:repeat value="#{chatBean.messages}" var="message">
+	<li class="#{!message.system? 'usermessage':'systemmessage'}"><b>#{message.system?'System:':'You:'}</b><span >#{message.message}</span></li>
+</ui:repeat>
+</ul>
+</p:panel>
+<div style="position:relative;bottom:0px">
+<h:form id="form1">
+	<p:remoteCommand name="applyData" actionListener="#{chatBean.remoteCallDC}">
+		
+	</p:remoteCommand>
+	<table>
+	<tr>
+	<td style="width:90%">
+	<p:inputText id="chatText" value="#{chatBean.textFromUser}" style="width:100%; height:100%"/>
+	<p:inputText type="hidden" id="hiddenText" value="#{chatBean.hiddenText}"/>
+	</td><td><h:commandButton id="button1" value="Talk" onclick="return say()" render="chat_body" style="height:90%" actionListener="#{chatBean.remoteCallDC}" ajax="true">
+		<!-- <f:ajax render="chat_body,@form"/> -->
+	</h:commandButton>
+	</td></tr>
+	</table>
+</h:form>
+	
+</div>
+
+</div>
+
+<div class="row">
+<input id="text" value="#{chatBean.systemMessage}" />(Recognized text for voice will also appear here)
+<br/><br/>
+<button class="btn btn-success" onclick="talk()">Talk It!</button>
+<button class="btn btn-success" onclick="listen()">Recognize My Voice</button>
+</div>
+<script src="platform.js"></script>
+<script src="webspeech.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+var islisten=true;
+
+    var speaker = new RobotSpeaker();
+    var listener = new AudioListener();
+    speaker.speak("en", document.getElementById("text").value);
+    function talk() {
+        speaker.speak("en", document.getElementById("text").value);
+    }
+
+    function listen() {
+        listener.listen("en", function(text) {
+        	 document.getElementById("form1:chatText").value = text;
+        	document.getElementById("form1:hiddenText").value = text;
+            document.getElementById("text").value = text;
+            islisten=false;
+            document.getElementById('form1:button1').click(); 
+        });
+        //islisten=false;
+    	//document.getElementById('form1:button1').click();
+    }
+    
+    function say(){
+    	//alert('hi');
+    	if(islisten)
+    		listen();
+    	/*if(!submit){
+    		alert('hi2');
+			//listen();
+			//e.preventDefault();
+    		setTimeout(function(){
+    			submit=true;
+    			$(this).click();
+    			//return true;
+    		},6000);
+    		return false;
+		}else{
+			alert('submitting ...');
+			submit=false;
+			return true;
+		}*/
+		if(!islisten){
+			islisten=true;
+			return true;
+		}
+		return false;
+    }
+    
+    $(function(){
+    	var submit=false;
+    	
+    });
+    
+    function recv(data){
+	    	alert('here');
+	    	if(data.status=='success'){
+	    	speaker.speak('en','Hello How are you');
+    	}
+    }
+</script>
+
+</h:body>
+</html>
